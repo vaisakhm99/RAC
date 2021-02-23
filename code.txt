@@ -1,0 +1,43 @@
+(*Define Unit vectors as parameters and constraints*)
+UnitVec[k_]:={Subscript[x, k],Subscript[y, k],Subscript[z, k]};
+Param[n_]:=Module[{i},Flatten[Table[{Subscript[x, i],Subscript[y, i],Subscript[z, i]},{i,1,n}]]];
+Constr[n_]:=Module[{i},And@@Table[Subscript[x, i]^2+Subscript[y, i]^2+Subscript[z, i]^2==1,{i,1,n}]];
+(*Factors={1,2,3,12,13,23,123}*)
+Factors=Times@@@Subsets[Transpose@Tuples[{1,-1},3],{1,3}];
+(*Rearrange*)
+(*Rearrange the numbers in the RHS to obtain different combinations*)
+Factors[[{1,2,3,4,5,6,7}]]=Factors[[{1,2,3,4,5,6,7}]];
+Factors=Transpose[Factors];
+
+(*Define Normalization*)
+Normalize[v_]:=v/Norm[v];
+
+SetDelayed::write: Tag Normalize in Normalize[v_] is Protected.
+Config[n_,q_,opts___?OptionQ]:=Module[{vec,sum,time,out,i,k,p,j,c,Nor,t,a,vecx},
+(*Probability
+q=50/100;*)
+s=1-q;
+r=2*q-1;
+sphereplot=Graphics3D[{Opacity[0.2], Sphere[{0,0,0},1]},Boxed->False];
+vec=Map[Table[Subscript[v, i],{i,1,n}].#&,Factors[[1;;8,1;;n]]]/.{Subscript[v, 1]->{1,0,0},Subscript[v, k_]->{UnitVec[k][[1]],UnitVec[k][[2]]*r,UnitVec[k][[3]]*r}};
+vecx=Map[Table[Subscript[v, i],{i,1,n}].#&,Factors[[1;;8,1;;n]]]/.{Subscript[v, 1]->{1,0,0},Subscript[v, k_]->UnitVec[k]};
+sum=Plus@@Map[Sqrt[#.#]&,vec];
+out=NMaximize[{sum,Constr[n]},Param[n],opts,MaxIterations->500,WorkingPrecision->50,AccuracyGoal->Infinity,PrecisionGoal->Infinity];
+p=1/2 (1+out[[1]]/(n*2^3));
+Print["n=",n," prob=",N[p,10]];
+Nor=Map[Normalize,vecx/.out[[2]]];
+t=Table[1/Sqrt[1-4*s*q*(Nor[[j,2]]^2+Nor[[j,3]]^2)],{j,1,8}];
+encod=Table[{t[[c]]*Nor[[c,1]],t[[c]]*Nor[[c,2]]*r^2,t[[c]]*Nor[[c,3]]*r^2},{c,1,8}];
+meas=Table[UnitVec[i]/.Join[{Subscript[x, 1]->1,Subscript[y, 1]->0,Subscript[z, 1]->0},out[[2]]],{i,1,n}];
+(*Print["Encoding=",encod,"Measurements=",meas];*)
+bx=meas;
+ax=encod;
+sphereplot=Graphics3D[{Opacity[0.2], Sphere[{0,0,0},1]},Boxed->False];
+pointplot=Graphics3D[{PointSize[0.03],Point[ax]}];measureplot=ListPointPlot3D[bx,PlotStyle->Directive[Red,PointSize->.01]];
+arrowplot=Table[Graphics3D[{Thick,Blue,Arrow[{{0,0,0},bx[[i]]}]}],{i,1,Length[bx]}];
+origin=Graphics3D[{PointSize[0.02],Point[{0,0,0}]}];
+Show[sphereplot,arrowplot,pointplot,origin,Boxed->False,Axes->False]
+
+];
+Config[6,999/1000]
+n=6 prob=0.7039881533

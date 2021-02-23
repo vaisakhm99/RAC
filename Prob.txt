@@ -1,0 +1,18 @@
+Numofbits=3;
+NumOfFunc=4;
+AllFunc=BitXor@@@Subsets[Transpose@Tuples[{0,1},Numofbits],{1,Numofbits}]
+{{0,0,0,0,1,1,1,1},{0,0,1,1,0,0,1,1},{0,1,0,1,0,1,0,1},{0,0,1,1,1,1,0,0},{0,1,0,1,1,0,1,0},{0,1,1,0,0,1,1,0},{0,1,1,0,1,0,0,1}}
+AllFunc[[{1,2,3,4}]]=AllFunc[[{1,2,4,6}]];
+AllFunc
+{{0,0,0,0,1,1,1,1},{0,0,1,1,0,0,1,1},{0,0,1,1,1,1,0,0},{0,1,1,0,0,1,1,0},{0,1,0,1,1,0,1,0},{0,1,1,0,0,1,1,0},{0,1,1,0,1,0,0,1}}
+d= 0;
+m=0;
+While[m<2^(2^Numofbits),b=0;k=1;
+While[k<NumOfFunc+1,a=0;c=0;a=HammingDistance[IntegerDigits[m,2,2^Numofbits],AllFunc[[k]]];
+c=If[a>2^(Numofbits-1),a,2^(Numofbits)-a];b+=c;k++];d=If[b>d,b,d];m++]
+Print[d/(2^Numofbits*NumOfFunc)]
+11/16
+Transpose[Times@@@Subsets[Transpose@Tuples[{1,-1},3],{1,3}]][[1;;8,1;;3]]
+{{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1}}
+Tuples[{1,-1},3]
+{{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1}}

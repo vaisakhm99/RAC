@@ -1,0 +1,21 @@
+factors=BitXor@@@Subsets[Transpose@Tuples[{0,1},3],{1,3}];
+factors[[{1,2,3,4,5,6,7}]]=factors[[{1,2,3,4,5,6,7}]];
+factors=Transpose[factors];
+unit={0,0,1};
+Subscript[r, n_]:=Sqrt[Sec[Pi/n]];
+state[n_,i_]:={ Subscript[r, n]Cos[2Pi i/n] ,Subscript[r, n]Sin[2Pi i/n],1};
+effect[n_,i_]:=1/2{Subscript[r, n]Cos[(2i-1)Pi/n],Subscript[r, n]Sin[(2i-1)Pi/n],1};
+meas[n_,j_]:={effect[n,j],unit-effect[n,j]};
+set[n_,k_]:=Tuples[Table[meas[n,i],{i,1,n}],{k}];
+
+(*p[n_,k_]:=Max[Table[Total[Table[Max[Table[Dot[Apply[Plus,Tuples[Table[set[n,k][[l,m]],{m,1,k}]][[FromDigits[#,2]&/@factors[[1;;8,1;;k]]+1]],{1}][[p]],state[n,i]],{i,1,n}]],{p,1,8}]],{l,1,Length[set[n,k]]}]]/(k 8);
+p[4,5]*)
+first[n_,k_]:=Table[Total[Table[Max[Table[Dot[Apply[Plus,Tuples[Table[set[n,k][[l,m]],{m,1,k}]][[FromDigits[#,2]&/@factors[[1;;8,1;;k]]+1]],{1}][[p]],state[n,i]],{i,1,n}]],{p,1,8}]],{l,1,Length[set[n,k]]}];
+first=first[6,4];
+p=Max[first]/(4*8)
+3/4
+Sort[first];
+pos1=Ordering[first,-1][[1]]
+1295
+set[6,4][[pos1]]
+{{{3^(1/4)/(2 Sqrt[2]),-(1/(2 Sqrt[2] 3^(1/4))),1/2},{-(3^(1/4)/(2 Sqrt[2])),1/(2 Sqrt[2] 3^(1/4)),1/2}},{{3^(1/4)/(2 Sqrt[2]),-(1/(2 Sqrt[2] 3^(1/4))),1/2},{-(3^(1/4)/(2 Sqrt[2])),1/(2 Sqrt[2] 3^(1/4)),1/2}},{{3^(1/4)/(2 Sqrt[2]),-(1/(2 Sqrt[2] 3^(1/4))),1/2},{-(3^(1/4)/(2 Sqrt[2])),1/(2 Sqrt[2] 3^(1/4)),1/2}},{{0,-(1/(Sqrt[2] 3^(1/4))),1/2},{0,1/(Sqrt[2] 3^(1/4)),1/2}}}

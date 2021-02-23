@@ -1,0 +1,43 @@
+MakeUnitVector[k_]:={Subscript[x, k],Subscript[y, k],Subscript[z, k]};
+AllParameters[n_]:=Module[{i},Flatten[Table[{Subscript[x, i],Subscript[y, i],Subscript[z, i]},{i,1,n}]]];
+AllConstraints[n_]:=Module[{i},And@@Table[Subscript[x, i]^2+Subscript[y, i]^2+Subscript[z, i]^2==1,{i,1,n}]];
+Normalize[v_]:=v/Norm[v];
+
+
+(*Factors={1,2,3,12,13,23,123}*)
+Factors=Times@@@Subsets[Transpose@Tuples[{1,-1},3],{1,3}];
+(*Rearrange*)
+(*Rearrange the numbers in the RHS to obtain different combinations*)
+Factors[[{1,2,3,4,5,6,7}]]=Factors[[{1,2,3,4,5,6,7}]];
+Factors=Transpose[Factors];
+
+
+
+SetDelayed::write: Tag Normalize in Normalize[v_] is Protected.
+
+FindConfiguration[n_,q_,opts___?OptionQ]:=Module[{vecs,bigsum,time,i,k,p,j,c,Nor,t,a,vecsx},
+(*Probability
+q=50/100;*)
+s=1-q;
+r=2*q-1;
+vecs=Map[Table[Subscript[v, i],{i,1,n}].#&,Factors[[1;;8,1;;n]]]/.{Subscript[v, k_]->{MakeUnitVector[k][[1]],MakeUnitVector[k][[2]]*Sqrt[(1-4 q s)],MakeUnitVector[k][[3]]*Sqrt[(1-4 q s)]}};
+vecsx=Map[Table[Subscript[v, i],{i,1,n}].#&,Factors[[1;;8,1;;n]]]/.{Subscript[v, k_]->MakeUnitVector[k]};
+bigsum=Plus@@Map[Sqrt[#.#]&,vecs];
+{time,res}=Timing[NMaximize[{bigsum,AllConstraints[n]},AllParameters[n],opts,MaxIterations->500,WorkingPrecision->50,AccuracyGoal->Infinity,PrecisionGoal->Infinity]];
+p=1/2 (1+res[[1]]/(n*2^3));
+Print["n=",n," p=",N[p,10]];
+Nor=Map[Normalize,vecsx/.res[[2]]];
+t=Table[1/Sqrt[1-4*s*q*(Nor[[j,2]]^2+Nor[[j,3]]^2)],{j,1,8}];
+encod=Table[{t[[c]]*Nor[[c,1]],t[[c]]*Nor[[c,2]]*r^2,t[[c]]*Nor[[c,3]]*r^2},{c,1,8}];
+meas=Table[MakeUnitVector[i]/.res[[2]],{i,1,n}];
+Print["Encoding=",encod,"Measurements=",meas];
+bx=meas;
+ax=encod;
+sphereplot=Graphics3D[{Opacity[0.2], Sphere[{0,0,0},1]},Boxed->False];
+pointplot=Graphics3D[{PointSize[0.03],Point[ax]}];measureplot=ListPointPlot3D[bx,PlotStyle->Directive[Red,PointSize->.01]];
+arrowplot=Table[Graphics3D[{Thick,Blue,Arrow[{{0,0,0},bx[[i]]}]}],{i,1,Length[bx]}];
+origin=Graphics3D[{PointSize[0.02],Point[{0,0,0}]}];
+Show[sphereplot,arrowplot,pointplot,origin,Boxed->False,Axes->False]
+];
+
+FindConfiguration[3,95/100]
